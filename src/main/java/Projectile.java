@@ -11,7 +11,7 @@ public class Projectile {
     }
 
     public void move() {
-        y += speed; // Move o projétil para baixo
+        y += speed;
     }
 
     public Rectangle getBounds() {

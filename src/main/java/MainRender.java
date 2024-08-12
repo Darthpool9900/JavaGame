@@ -1,38 +1,33 @@
+import CloudsMechanicsSystem.CloudManager;
 import PlayerSound.SoundPlayer;
-
-import javax.swing.*;
+import java.util.List;  // Certifique-se de importar a interface genérica List do pacote java.util
 import java.awt.*;
-import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import javax.swing.*;
 
 public class MainRender extends JPanel implements ActionListener, KeyListener {
     private Timer timer;
     private Airplane airplane;
     private City city;
-    private List<Projectile> projectiles;
-    private List<Cloud> clouds;
+    private CloudManager managerClouds;
     private int score;
-    private int dayNightCycle; // Ciclo para alternar dia e noite
-    private boolean isDay; // Variável para rastrear o ciclo de dia/noite
+    private int dayNightCycle;
+    private boolean isDay;
 
     public MainRender() {
-        this.setPreferredSize(new Dimension(800, 600));
-        this.isDay = true; // Começa com o dia
-        this.airplane = new Airplane(100, 50);
-        this.city = new City(this);
-        this.projectiles = new ArrayList<>();
-        this.clouds = new ArrayList<>();
-        this.score = 0;
-        this.dayNightCycle = 0;
+        setPreferredSize(new Dimension(800, 600));
+        isDay = true;
+        airplane = new Airplane(100, 50);
+        city = new City(this);
+        managerClouds = new CloudManager(7);
+        score = 0;
+        dayNightCycle = 0;
 
-        // Adiciona algumas nuvens
-        for (int i = 0; i < 5; i++) {
-            clouds.add(new Cloud((int) (Math.random() * 800), (int) (Math.random() * 200)));
-        }
-
-        this.timer = new Timer(20, this);
-        this.timer.start();
+        timer = new Timer(30, this);
+        timer.start();
 
         addKeyListener(this);
         setFocusable(true);
@@ -43,41 +38,26 @@ public class MainRender extends JPanel implements ActionListener, KeyListener {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        // Define a cor de fundo com base no ciclo dia/noite
-        this.setBackground(isDay ? Color.CYAN : Color.BLACK);
-
-        // Atualiza e desenha as nuvens
-        for (Cloud cloud : clouds) {
-            cloud.move();
-            cloud.draw(g2d,isDay);
-        }
+        setBackground(isDay ? Color.CYAN : Color.BLACK);
 
         city.draw(g2d);
-        airplane.draw(g2d, isDay); // Passa a variável isDay para o avião mudar de cor
+        airplane.draw(g2d, isDay);
+        managerClouds.moveAndDrawClouds(g2d, isDay);
         drawProjectiles(g2d);
         drawScore(g2d);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        // Atualiza o movimento dos projéteis e checa colisões
         airplane.updateProjectiles();
         List<Projectile> projectilesToRemove = city.checkCollisions(airplane.getProjectiles(), this);
 
-        // Remove os projéteis que saíram da tela
-        List<Projectile> toRemove = new ArrayList<>();
-        for (Projectile projectile : airplane.getProjectiles()) {
-            if (projectile.getBounds().y <= 0 || projectilesToRemove.contains(projectile)) {
-                toRemove.add(projectile);
-            }
-        }
-        airplane.getProjectiles().removeAll(toRemove);
+        airplane.getProjectiles().removeAll(projectilesToRemove);
 
-        // Alterna entre dia e noite a cada 10 segundos
         dayNightCycle++;
         if (dayNightCycle % 500 == 0) {
             city.toggleDayNight();
-            isDay = !isDay; // Alterna entre dia e noite
+            isDay = !isDay;
         }
 
         repaint();
@@ -110,15 +90,14 @@ public class MainRender extends JPanel implements ActionListener, KeyListener {
         g2d.drawString("Score: " + score, 10, 20);
     }
 
-    // Método para atualizar a pontuação
     public void updateScore(int increment) {
         score += increment;
     }
 
     public static void main(String[] args) {
-        SoundPlayer BackgroundMusic = new SoundPlayer("flat-8-bit-gaming-music-instrumental-211547.wav");
-        BackgroundMusic.SetRepeatSound(true);
-        BackgroundMusic.play();
+        SoundPlayer backgroundMusic = SoundPlayer.getInstance("flat-8-bit-gaming-music-instrumental-211547.wav", true);
+        backgroundMusic.play();
+
         JFrame frame = new JFrame("City Game");
         MainRender game = new MainRender();
         frame.add(game);

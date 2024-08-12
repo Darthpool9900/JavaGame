@@ -1,5 +1,4 @@
 import PlayerSound.SoundPlayer;
-
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
@@ -11,12 +10,14 @@ public class Airplane {
     private int width = 50, height = 20;
     private double angle;
     private List<Projectile> projectiles;
+    private SoundPlayer shootSound;
 
     public Airplane(int startX, int startY) {
         this.x = startX;
         this.y = startY;
         this.angle = 0;
         this.projectiles = new ArrayList<>();
+        this.shootSound = SoundPlayer.getInstance("8-bit-kit-lazer-5.wav", false);
     }
 
     public void moveLeft() {
@@ -39,7 +40,6 @@ public class Airplane {
         g2d.rotate(angle);
         g2d.translate(-width / 2, -height / 2);
 
-        // Muda a cor do avião de acordo com o ciclo de dia/noite
         g2d.setColor(isDay ? Color.BLACK : Color.YELLOW);
         g2d.fillRect(0, 0, width, height);
         g2d.fillRect(15, -10, 20, 10);
@@ -79,8 +79,7 @@ public class Airplane {
     }
 
     public void shoot() {
-        SoundPlayer ShootSound = new SoundPlayer("8-bit-kit-lazer-5.wav");
-        ShootSound.play();
+        shootSound.play();
         projectiles.add(new Projectile(x + width / 2 - 2, y + height / 2 - 10));
     }
 
@@ -88,7 +87,7 @@ public class Airplane {
         List<Projectile> toRemove = new ArrayList<>();
         for (Projectile projectile : projectiles) {
             projectile.move();
-            if (projectile.getBounds().y > 600) {
+            if (projectile.getBounds().y < 0) {
                 toRemove.add(projectile);
             }
         }

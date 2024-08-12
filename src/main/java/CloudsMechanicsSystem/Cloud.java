@@ -1,17 +1,21 @@
+package CloudsMechanicsSystem;
+
 import java.awt.*;
-import java.util.Random;
 
 public class Cloud {
     private int x, y;
     private int width, height;
     private int speed;
 
-    public Cloud(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public Cloud() {
         this.width = 100;  // Largura padrão das nuvens
         this.height = 60;  // Altura padrão das nuvens
         this.speed = 1;    // Velocidade de movimento das nuvens
+    }
+
+    public void init(int x, int y) {
+        this.x = x;
+        this.y = y;
     }
 
     public void move() {
@@ -23,8 +27,8 @@ public class Cloud {
         }
     }
 
-    public void draw(Graphics2D g2d,boolean isDay) {
-        g2d.setColor(isDay ?Color.WHITE:Color.DARK_GRAY);
+    public void draw(Graphics2D g2d, boolean isDay) {
+        g2d.setColor(isDay ? Color.WHITE : Color.DARK_GRAY);
         g2d.fillOval(x, y, width, height);  // Corpo principal da nuvem
 
         // Desenha "pufos" adicionais para a nuvem
